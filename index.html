@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>LexiKorea: Правовой практикум</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="dark">
+
+<div class="bg-decor"></div>
+
+<header>
+  <h1>⚖️ LexiKorea: Правовой практикум</h1>
+  <button class="theme-btn" id="themeBtn">🌓</button>
+</header>
+
+<main>
+  <!-- View: Flashcards -->
+  <div id="view-cards">
+    <div class="stats-row">
+      <div class="stat-card"><div class="val" id="statLearned">0</div><div class="label">Изучено</div></div>
+      <div class="stat-card"><div class="val">B2</div><div class="label">Уровень</div></div>
+      <div class="stat-card"><div class="val" id="statTotal">0</div><div class="label">Всего слов</div></div>
+    </div>
+
+    <div class="filters">
+      <div class="select-group">
+        <label>Колода</label>
+        <select id="topicSel"></select>
+      </div>
+      <div class="select-group">
+        <label>Направление</label>
+        <select id="modeSel">
+          <option value="easy">KO → RU</option>
+          <option value="medium">RU → KO</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card-container">
+      <div class="flashcard" id="cardEl">
+        <!-- Лицевая сторона -->
+        <div class="card-face">
+          <div class="card-actions">
+            <button class="fav-btn" id="favBtn" onclick="event.stopPropagation(); toggleFavorite()">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
+                <line x1="16" y1="8" x2="2" y2="22"></line>
+                <line x1="17.5" y1="15" x2="9" y2="15"></line>
+              </svg>
+            </button>
+            <button class="speak-fab" onclick="event.stopPropagation(); speakText(currentItem.front, currentItem.frontLang)">🔊</button>
+          </div>
+          <div class="card-ko" id="cardFront">Загрузка...</div>
+          <div class="card-hint">Нажмите для перевода</div>
+        </div>
+        
+        <!-- Обратная сторона -->
+        <div class="card-face card-back">
+          <div class="card-actions">
+            <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorite()">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
+                <line x1="16" y1="8" x2="2" y2="22"></line>
+                <line x1="17.5" y1="15" x2="9" y2="15"></line>
+              </svg>
+            </button>
+            <button class="speak-fab" onclick="event.stopPropagation(); speakText(currentItem.back, currentItem.backLang)">🔊</button>
+          </div>
+          <div class="card-ru" id="cardBack"></div>
+          <div class="card-hint">Нажмите, чтобы вернуть</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-context">
+      <div class="ai-badge" id="aiBadge">AI CONTEXT</div>
+      <div id="aiText">Контекст генерируется...</div>
+    </div>
+
+    <div class="nav-controls" style="margin-top: 24px;">
+      <button class="nav-btn" onclick="prevCard()">← Назад</button>
+      <span class="progress-text" id="progressText">1 / 10</span>
+      <button class="nav-btn" onclick="nextCard()">Вперед →</button>
+    </div>
+  </div>
+
+  <!-- View: Dialogues -->
+  <div id="view-dialogues" class="hidden">
+    <h2 style="margin-bottom: 20px; color: var(--text);">Практика диалогов (법인세법)</h2>
+    <div id="dialogueList"></div>
+  </div>
+
+  <!-- View: Listening -->
+  <div id="view-listen" class="hidden">
+    <h2 style="margin-bottom: 20px; color: var(--text);">Аудирование и Озвучка</h2>
+    <div class="tts-panel">
+      <button class="tts-btn active" data-style="natural" onclick="setTTSStyle('natural', this)">
+        <span class="icon">🗣️</span><span class="name">Естественно</span>
+      </button>
+      <button class="tts-btn" data-style="soft" onclick="setTTSStyle('soft', this)">
+        <span class="icon">🛋️</span><span class="name">Мягко</span>
+      </button>
+      <button class="tts-btn" data-style="energetic" onclick="setTTSStyle('energetic', this)">
+        <span class="icon">⚡</span><span class="name">Энергично</span>
+      </button>
+    </div>
+    <div id="listenList"></div>
+  </div>
+</main>
+
+<nav class="dock">
+  <button class="dock-item active" data-view="cards" onclick="switchView('cards', this)">
+    <span class="dock-icon">🎴</span> Карточки
+  </button>
+  <button class="dock-item" data-view="dialogues" onclick="switchView('dialogues', this)">
+    <span class="dock-icon">💬</span> Диалоги
+  </button>
+  <button class="dock-item" data-view="listen" onclick="switchView('listen', this)">
+    <span class="dock-icon">🎧</span> Аудио
+  </button>
+</nav>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
