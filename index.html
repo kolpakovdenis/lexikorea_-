@@ -2,130 +2,154 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>LexiKorea: Правовой практикум</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>LexiAudit — корейский юридический и аудиторский глоссарий</title>
+<meta name="description" content="Объединённый глоссарий-тренажёр: юридическая и аудиторская терминология корейского языка. Карточки, тест, глоссарий с поиском, диалоги и аудирование.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
-<body data-theme="dark">
+<body data-theme="light">
 
-<div class="bg-decor"></div>
+<div class="bg-decor" aria-hidden="true"></div>
 
-<header>
-  <h1>⚖️ LexiKorea: Правовой практикум</h1>
-  <button class="theme-btn" id="themeBtn">🌓</button>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">⚖️</div>
+    <div class="brand-text">
+      <h1>LexiAudit</h1>
+      <span class="tagline">Корейский юридический и аудиторский глоссарий</span>
+    </div>
+  </div>
+  <div class="top-stats" id="topStats" aria-live="polite"></div>
+  <button class="icon-btn" id="themeBtn" title="Сменить тему" aria-label="Сменить тему">🌓</button>
 </header>
 
-<main>
-  <!-- View: Flashcards -->
-  <div id="view-cards">
-    <div class="stats-row">
-      <div class="stat-card"><div class="val" id="statLearned">0</div><div class="label">Изучено</div></div>
-      <div class="stat-card"><div class="val">B2</div><div class="label">Уровень</div></div>
-      <div class="stat-card"><div class="val" id="statTotal">0</div><div class="label">Всего слов</div></div>
-    </div>
-
-    <div class="filters">
-      <div class="select-group">
-        <label>Колода</label>
-        <select id="topicSel"></select>
-      </div>
-      <div class="select-group">
-        <label>Направление</label>
-        <select id="modeSel">
-          <option value="easy">KO → RU</option>
-          <option value="medium">RU → KO</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="card-container">
-      <div class="flashcard" id="cardEl">
-        <!-- Лицевая сторона -->
-        <div class="card-face">
-          <div class="card-actions">
-            <button class="fav-btn" id="favBtn" onclick="event.stopPropagation(); toggleFavorite()">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
-                <line x1="16" y1="8" x2="2" y2="22"></line>
-                <line x1="17.5" y1="15" x2="9" y2="15"></line>
-              </svg>
-            </button>
-            <button class="speak-fab" onclick="event.stopPropagation(); speakText(currentItem.front, currentItem.frontLang)">🔊</button>
-          </div>
-          <div class="card-ko" id="cardFront">Загрузка...</div>
-          <div class="card-hint">Нажмите для перевода</div>
-        </div>
-        
-        <!-- Обратная сторона -->
-        <div class="card-face card-back">
-          <div class="card-actions">
-            <button class="fav-btn" onclick="event.stopPropagation(); toggleFavorite()">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
-                <line x1="16" y1="8" x2="2" y2="22"></line>
-                <line x1="17.5" y1="15" x2="9" y2="15"></line>
-              </svg>
-            </button>
-            <button class="speak-fab" onclick="event.stopPropagation(); speakText(currentItem.back, currentItem.backLang)">🔊</button>
-          </div>
-          <div class="card-ru" id="cardBack"></div>
-          <div class="card-hint">Нажмите, чтобы вернуть</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="ai-context">
-      <div class="ai-badge" id="aiBadge">AI CONTEXT</div>
-      <div id="aiText">Контекст генерируется...</div>
-    </div>
-
-    <div class="nav-controls" style="margin-top: 24px;">
-      <button class="nav-btn" onclick="prevCard()">← Назад</button>
-      <span class="progress-text" id="progressText">1 / 10</span>
-      <button class="nav-btn" onclick="nextCard()">Вперед →</button>
-    </div>
-  </div>
-
-  <!-- View: Dialogues -->
-  <div id="view-dialogues" class="hidden">
-    <h2 style="margin-bottom: 20px; color: var(--text);">Практика диалогов (법인세법)</h2>
-    <div id="dialogueList"></div>
-  </div>
-
-  <!-- View: Listening -->
-  <div id="view-listen" class="hidden">
-    <h2 style="margin-bottom: 20px; color: var(--text);">Аудирование и Озвучка</h2>
-    <div class="tts-panel">
-      <button class="tts-btn active" data-style="natural" onclick="setTTSStyle('natural', this)">
-        <span class="icon">🗣️</span><span class="name">Естественно</span>
-      </button>
-      <button class="tts-btn" data-style="soft" onclick="setTTSStyle('soft', this)">
-        <span class="icon">🛋️</span><span class="name">Мягко</span>
-      </button>
-      <button class="tts-btn" data-style="energetic" onclick="setTTSStyle('energetic', this)">
-        <span class="icon">⚡</span><span class="name">Энергично</span>
-      </button>
-    </div>
-    <div id="listenList"></div>
-  </div>
-</main>
-
-<nav class="dock">
-  <button class="dock-item active" data-view="cards" onclick="switchView('cards', this)">
-    <span class="dock-icon">🎴</span> Карточки
-  </button>
-  <button class="dock-item" data-view="dialogues" onclick="switchView('dialogues', this)">
-    <span class="dock-icon">💬</span> Диалоги
-  </button>
-  <button class="dock-item" data-view="listen" onclick="switchView('listen', this)">
-    <span class="dock-icon">🎧</span> Аудио
-  </button>
+<nav class="view-tabs" id="viewTabs" aria-label="Разделы">
+  <button class="tab active" data-view="cards"><span class="tab-ic">🎴</span>Карточки</button>
+  <button class="tab" data-view="quiz"><span class="tab-ic">🎯</span>Тест</button>
+  <button class="tab" data-view="glossary"><span class="tab-ic">📖</span>Глоссарий</button>
+  <button class="tab" data-view="dialogues"><span class="tab-ic">💬</span>Диалоги</button>
+  <button class="tab" data-view="audio"><span class="tab-ic">🎧</span>Аудио</button>
 </nav>
 
-<script src="data.js"></script>
+<main>
+
+  <!-- ============ КАРТОЧКИ ============ -->
+  <section id="view-cards" class="view">
+    <div class="quote-strip" id="quoteStrip" title="Нажмите, чтобы показать другую цитату"></div>
+
+    <div class="deck-chips" id="deckChips" role="tablist" aria-label="Колоды"></div>
+
+    <div class="controls-row">
+      <div class="seg" id="modeSeg" role="group" aria-label="Направление перевода">
+        <button data-mode="ko-ru" class="active">KO → RU</button>
+        <button data-mode="ru-ko">RU → KO</button>
+      </div>
+      <div class="deck-progress">
+        <div class="bar"><i id="deckProgressBar"></i></div>
+        <span id="deckProgressText" class="muted">—</span>
+      </div>
+    </div>
+
+    <div class="card-zone" id="cardZone">
+      <div class="flashcard" id="cardEl" role="button" tabindex="0" aria-label="Карточка — нажмите для переворота">
+        <!-- лицевая сторона -->
+        <div class="face front">
+          <div class="card-actions">
+            <button class="icon-btn fav-btn" onclick="event.stopPropagation(); toggleFav()" title="В избранное">☆</button>
+            <button class="icon-btn" onclick="event.stopPropagation(); speakSide('front')" title="Озвучить">🔊</button>
+          </div>
+          <span class="deck-badge" id="frontBadge"></span>
+          <div class="term" id="frontTerm">Загрузка…</div>
+          <div class="face-tip">Нажмите на карточку, чтобы увидеть перевод</div>
+          <button class="know-btn" onclick="event.stopPropagation(); toggleLearned()" title="Отметить как выученное">✓ Знаю</button>
+        </div>
+        <!-- обратная сторона -->
+        <div class="face back">
+          <div class="card-actions">
+            <button class="icon-btn fav-btn" onclick="event.stopPropagation(); toggleFav()" title="В избранное">☆</button>
+            <button class="icon-btn" onclick="event.stopPropagation(); speakSide('back')" title="Озвучить">🔊</button>
+          </div>
+          <span class="deck-badge" id="backBadge"></span>
+          <div class="term-ru" id="backTerm"></div>
+          <div class="hint" id="backHint"></div>
+          <div class="example" id="backExample">
+            <div class="ex-row"><span class="ex-kor" id="exKor"></span>
+              <button class="icon-btn ex-speak" onclick="event.stopPropagation(); speakEx()" title="Озвучить пример">🔊</button>
+            </div>
+            <div class="ex-ru" id="exRus"></div>
+          </div>
+          <div class="face-tip">Нажмите, чтобы вернуться</div>
+          <button class="know-btn" onclick="event.stopPropagation(); toggleLearned()" title="Отметить как выученное">✓ Знаю</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="prevBtn" aria-label="Предыдущая">←</button>
+      <span class="progress-text" id="progressText">— / —</span>
+      <button class="nav-btn" id="randBtn" aria-label="Случайная карточка" title="Случайная карточка (R)">🎲</button>
+      <button class="nav-btn" id="nextBtn" aria-label="Следующая">→</button>
+    </div>
+    <p class="kbd-hint muted">Клавиши: ← → листать · Space — перевернуть · F — в избранное · S — озвучить · R — случайная</p>
+  </section>
+
+  <!-- ============ ТЕСТ ============ -->
+  <section id="view-quiz" class="view hidden">
+    <div class="quiz-head">
+      <div class="quiz-score">
+        <span class="pill ok-pill">✔ <b id="quizOk">0</b></span>
+        <span class="pill bad-pill">✘ <b id="quizBad">0</b></span>
+        <span class="pill fire-pill">🔥 серия <b id="quizStreak">0</b></span>
+      </div>
+      <button class="text-btn" id="quizReset">Сбросить счёт</button>
+    </div>
+    <div class="quiz-card">
+      <span class="deck-badge" id="quizBadge"></span>
+      <div class="quiz-task muted">Выберите правильный перевод:</div>
+      <div class="quiz-q" id="quizQ">…</div>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div>
+      <button class="primary-btn hidden" id="quizNext">Дальше →</button>
+    </div>
+  </section>
+
+  <!-- ============ ГЛОССАРИЙ ============ -->
+  <section id="view-glossary" class="view hidden">
+    <div class="search-row">
+      <input type="search" id="glossarySearch" placeholder="🔍 Поиск по корейскому, русскому или разбору…" autocomplete="off">
+      <span class="search-count muted" id="searchCount"></span>
+    </div>
+    <div class="deck-chips" id="deckChips2" role="tablist" aria-label="Фильтр по колодам"></div>
+    <div class="glossary-list" id="glossaryList"></div>
+  </section>
+
+  <!-- ============ ДИАЛОГИ ============ -->
+  <section id="view-dialogues" class="view hidden">
+    <h2>Практика диалогов <span class="muted">(дело о 법인세법)</span></h2>
+    <div id="dialogueList"></div>
+  </section>
+
+  <!-- ============ АУДИО ============ -->
+  <section id="view-audio" class="view hidden">
+    <h2>Аудирование и озвучка</h2>
+    <div class="tts-panel" id="ttsPanel">
+      <button class="tts-btn active" data-style="natural" onclick="setTTSStyle('natural')"><span class="icon">🗣️</span><span class="name">Естественно</span></button>
+      <button class="tts-btn" data-style="soft" onclick="setTTSStyle('soft')"><span class="icon">🛋️</span><span class="name">Мягко</span></button>
+      <button class="tts-btn" data-style="energetic" onclick="setTTSStyle('energetic')"><span class="icon">⚡</span><span class="name">Энергично</span></button>
+    </div>
+    <p class="muted kbd-hint">Список слов текущей колоды — слушайте и повторяйте вслух.</p>
+    <div class="glossary-list" id="listenList"></div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  LexiAudit · объединение проектов <b>LexiKorea</b> и <b>AuditLex</b> · <span id="footCount"></span>
+</footer>
+
 <script src="script.js"></script>
 </body>
 </html>
