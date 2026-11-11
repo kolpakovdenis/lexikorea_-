@@ -775,7 +775,7 @@ function renderGlossary(){
         <div class="g-hint">${g.hint || ''}</div>
         ${g.exKor ? `<div class="g-exkor">${g.exKor}</div>${g.exRus ? `<div class="g-exru">${g.exRus}</div>` : ''}` : ''}
       </div>`;
-    row.querySelector('.g-top').onclick = () => row.classList.toggle('open');
+    row.querySelector('.g-top').onclick = () => { if (!hasSelection()) row.classList.toggle('open'); };
     row.querySelector('.g-star').onclick = e => {
       e.stopPropagation();
       state.favs.has(g.ko) ? state.favs.delete(g.ko) : state.favs.add(g.ko);
@@ -883,14 +883,28 @@ document.addEventListener('keydown', e => {
   zone.addEventListener('touchend', e => {
     if (x0 === null) return;
     const dx = e.changedTouches[0].clientX - x0;
-    if (Math.abs(dx) > 60){ dx < 0 ? nextCard() : prevCard(); }
+    // выделение текста длинным нажатием — не листаем карточку
+    if (!hasSelection() && Math.abs(dx) > 60){ dx < 0 ? nextCard() : prevCard(); }
     x0 = null;
   }, { passive: true });
 })();
 
 /* ---------- привязка событий ---------- */
+/* Выделение текста: если пользователь выделяет слово, чтобы скопировать/перевести его,
+   никакие обработчики клика не должны срабатывать */
+function hasSelection(){
+  const s = window.getSelection();
+  return !!(s && !s.isCollapsed && String(s).trim());
+}
 $('cardEl').addEventListener('click', e => {
-  if (!e.target.closest('button')) $('cardEl').classList.toggle('flipped');
+  if (e.target.closest('button')) return;
+  if (hasSelection() || e.detail > 1) return;   // выделен текст или двойной клик — не переворачиваем
+  $('cardEl').classList.toggle('flipped');
+});
+/* Двойной клик по слову выделяет его: первый клик успел перевернуть карточку —
+   возвращаем исходную сторону, чтобы слово осталось на глазах */
+$('cardEl').addEventListener('dblclick', () => {
+  if (hasSelection()) $('cardEl').classList.toggle('flipped');
 });
 $('cardEl').addEventListener('keydown', e => {
   if (e.key === 'Enter') $('cardEl').classList.toggle('flipped');
@@ -898,7 +912,7 @@ $('cardEl').addEventListener('keydown', e => {
 $('prevBtn').addEventListener('click', prevCard);
 $('nextBtn').addEventListener('click', nextCard);
 $('randBtn').addEventListener('click', randCard);
-$('quoteStrip').addEventListener('click', nextQuote);
+$('quoteStrip').addEventListener('click', () => { if (!hasSelection()) nextQuote(); });
 $('quizNext').addEventListener('click', () => buildQuiz(true));
 $('quizReset').addEventListener('click', () => { state.quiz = null; buildQuiz(false); });
 $('glossarySearch').addEventListener('input', e => { state.search = e.target.value; renderGlossary(); });
